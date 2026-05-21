@@ -1,7 +1,6 @@
 import cv2
 import numpy as np
 import time
-import winsound
 
 class LivenessDetector:
     def __init__(self):
@@ -13,11 +12,8 @@ class LivenessDetector:
             cv2.data.haarcascades + 'haarcascade_smile.xml')
 
         self.reset_state()
-
         self.prev_face_center = None
         self.face_missing_frames = 0
-
-    # --------------------------------------------------
 
     def reset_state(self):
         self.eye_blinked = False
@@ -28,8 +24,6 @@ class LivenessDetector:
         self.last_blink_time = 0
         self.face_rect = None
         self.start_time = time.time()
-
-    # --------------------------------------------------
 
     def detect_face(self, frame):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -43,9 +37,10 @@ class LivenessDetector:
         self.face_rect = max(faces, key=lambda r: r[2]*r[3])
         return True
 
-    # --------------------------------------------------
-
     def detect_eye_blink(self, frame):
+        if self.face_rect is None:
+            return
+
         x, y, w, h = self.face_rect
         roi = cv2.cvtColor(frame[y:y+h, x:x+w], cv2.COLOR_BGR2GRAY)
 
@@ -61,13 +56,14 @@ class LivenessDetector:
         if not self.prev_eyes_open and eyes_open:
             if 0.1 < now - self.last_blink_time < 0.7:
                 self.eye_blinked = True
-                winsound.Beep(900, 60)
+                print("Blink detected")  # safe instead of winsound
 
         self.prev_eyes_open = eyes_open
 
-    # --------------------------------------------------
-
     def detect_head_movement(self):
+        if self.face_rect is None:
+            return
+
         x, y, w, h = self.face_rect
         center = np.array([x + w//2, y + h//2])
 
@@ -78,9 +74,10 @@ class LivenessDetector:
 
         self.prev_face_center = center
 
-    # --------------------------------------------------
-
     def detect_mouth_movement(self, frame):
+        if self.face_rect is None:
+            return
+
         x, y, w, h = self.face_rect
         roi = cv2.cvtColor(frame[y:y+h, x:x+w], cv2.COLOR_BGR2GRAY)
 
@@ -94,20 +91,15 @@ class LivenessDetector:
 
         self.prev_mouth_open = mouth_open
 
-    # --------------------------------------------------
-
     def calculate_percentages(self):
         cues = sum([self.eye_blinked, self.head_moved, self.mouth_moved])
         live_percent = int((cues / 3) * 100)
         spoof_percent = 100 - live_percent
         return live_percent, spoof_percent
 
-    # --------------------------------------------------
-
     def process(self, frame):
         face_found = self.detect_face(frame)
 
-        # Face disappeared → reset
         if not face_found:
             self.face_missing_frames += 1
             if self.face_missing_frames > 10:
@@ -116,21 +108,11 @@ class LivenessDetector:
 
         self.face_missing_frames = 0
 
-        # New face → reset
-        if self.prev_face_center is not None:
-            x, y, w, h = self.face_rect
-            new_center = np.array([x + w//2, y + h//2])
-            if np.linalg.norm(new_center - self.prev_face_center) > 80:
-                self.reset_state()
-
-        # Detect cues
         self.detect_eye_blink(frame)
         self.detect_head_movement()
         self.detect_mouth_movement(frame)
 
         return frame
-
-    # --------------------------------------------------
 
     def draw_ui(self, frame):
         h, w = frame.shape[:2]
@@ -151,45 +133,4 @@ class LivenessDetector:
         cv2.putText(frame, label, (w//2 - 150, h//2),
                     cv2.FONT_HERSHEY_SIMPLEX, 2.5, color, 6)
 
-        cv2.putText(frame, f"LIVE: {live_p}%",
-                    (w//2 - 150, h//2 + 70),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0,255,0), 3)
-
-        cv2.putText(frame, f"SPOOF: {spoof_p}%",
-                    (w//2 - 150, h//2 + 110),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1.2, (0,0,255), 3)
-
-        cv2.rectangle(frame, (0, 0), (w-1, h-1), color, 8)
         return frame
-
-    # --------------------------------------------------
-
-    def run(self):
-        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
-        time.sleep(1)
-
-        print("Continuous Liveness Detection Running")
-        print("Press 'q' to quit")
-
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                continue
-
-            frame = cv2.flip(frame, 1)
-            frame = self.process(frame)
-            frame = self.draw_ui(frame)
-
-            cv2.imshow("Face Liveness Detection", frame)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-
-        cap.release()
-        cv2.destroyAllWindows()
-
-# --------------------------------------------------
-
-if __name__ == "__main__":
-    detector = LivenessDetector()
-    detector.run()
