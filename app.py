@@ -1,6 +1,6 @@
-import numpy as np
 from flask import Flask, Response, render_template, request, redirect, url_for, session
 import cv2
+import numpy as np
 from detect import LivenessDetector
 import os
 
@@ -13,19 +13,17 @@ PASSWORD = "1234"
 detector = LivenessDetector()
 
 def generate_frames():
-    # ❌ Disable camera for deployment
     while True:
-        # Create a blank frame instead of camera
-        frame = cv2.imread("https://via.placeholder.com/640x480.png?text=Camera+Not+Supported")
-
-        if frame is None:
-            # fallback blank image
-            frame = 255 * np.ones((480, 640, 3), dtype=np.uint8)
+        # Create dummy frame (no camera on server)
+        frame = np.ones((480, 640, 3), dtype=np.uint8) * 255
 
         cv2.putText(frame, "Camera not supported on server",
                     (50, 240),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     0.7, (0, 0, 255), 2)
+
+        frame = detector.process(frame)
+        frame = detector.draw_ui(frame)
 
         ret, buffer = cv2.imencode('.jpg', frame)
         frame = buffer.tobytes()
