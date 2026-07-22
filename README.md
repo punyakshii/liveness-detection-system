@@ -121,13 +121,6 @@ in real time.
 
 ---
 
-# Project Architecture
-
-```<img width="647" height="966" alt="image" src="https://github.com/user-attachments/assets/efb1c98c-e5d2-4a02-bf27-b30448dd8881" />
-
-
----
-
 # Folder Structure
 
 ```
@@ -215,59 +208,6 @@ Open your browser
 http://127.0.0.1:5000/login
 ```
 
----
-
-# Screenshots
-
-## Login Page
-
-Add screenshot here
-
-```
-screenshots/login.png
-```
-
----
-
-## Dashboard
-
-Add screenshot here
-
-```
-screenshots/dashboard.png
-```
-
----
-
-## Emotion Detection
-
-Add screenshot here
-
-```
-screenshots/emotion.png
-```
-
----
-
-## Voice Recognition
-
-Add screenshot here
-
-```
-screenshots/voice.png
-```
-
----
-
-## Liveness Detection
-
-Add screenshot here
-
-```
-screenshots/liveness.png
-```
-
----
 
 # Working Process
 
