@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gateway Access Authorized - AuraGate AI</title>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- HEADER NAVIGATION -->
+    <header>
+        <div class="brand">
+            <i class="fa-solid fa-fingerprint"></i>
+            <span>AuraGate AI</span>
+        </div>
+        <div class="connection-status">
+            <span class="status-dot" style="background: var(--neon-green); box-shadow: 0 0 8px var(--neon-green);"></span>
+            <span>Session Active</span>
+        </div>
+    </header>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="dashboard-wrapper">
+        <div class="glow-orb"></div>
+        
+        <div class="dashboard-card">
+            <div class="success-shield">
+                <i class="fa-solid fa-shield-check"></i>
+            </div>
+            
+            <h1>Access Authorized</h1>
+            <p>
+                Your biometric profile has been successfully evaluated and matches the requested clearance. Operator session is now active and secure.
+            </p>
+
+            <div class="user-badge">
+                <i class="fa-solid fa-user-gear"></i>
+                <span>Operator: <strong>{{ session.get('user', 'punyakshi') }}</strong></span>
+            </div>
+
+            <!-- Meta Data table -->
+            <div class="diagnostics-panel" style="width: 100%; text-align: left; margin-bottom: 10px;">
+                <div class="diagnostics-title">
+                    <span>Authorized Session Metadata</span>
+                </div>
+                
+                <div class="diag-grid" style="grid-template-columns: 1fr;">
+                    <div class="diag-item" style="display: flex; justify-content: space-between;">
+                        <span class="diag-label">Authentication Status</span>
+                        <span style="color: var(--neon-green); font-weight: 600;">Verified (Liveness Pass)</span>
+                    </div>
+                    <div class="diag-item" style="display: flex; justify-content: space-between;">
+                        <span class="diag-label">Authorization Clearance</span>
+                        <span style="color: var(--neon-cyan); font-weight: 600;">System Administrator</span>
+                    </div>
+                    <div class="diag-item" style="display: flex; justify-content: space-between;">
+                        <span class="diag-label">IP Address Reference</span>
+                        <span style="color: var(--text-secondary); font-family: monospace;">127.0.0.1 (Localhost)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logout action button -->
+            <a href="/logout" class="btn-logout">
+                <i class="fa-solid fa-power-off"></i>
+                Terminate Session
+            </a>
+        </div>
+    </main>
+
+</body>
+</html>

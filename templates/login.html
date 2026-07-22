@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraGate Biometric Login Portal</title>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <!-- HEADER NAVIGATION -->
+    <header>
+        <div class="brand">
+            <i class="fa-solid fa-fingerprint"></i>
+            <span>AuraGate AI</span>
+        </div>
+        <div class="connection-status">
+            <span class="status-dot" id="system-status-dot"></span>
+            <span id="system-status-text">System Standby</span>
+        </div>
+    </header>
+
+    <!-- STAGE 1: HERO / WELCOME SECTION -->
+    <section class="hero-section" id="hero-sec">
+        <div class="glow-orb"></div>
+        <h1 class="hero-title">Secure Biometric<br><span>Liveness Login</span></h1>
+        <p class="hero-desc">
+            A state-of-the-art authentication gate powered by deep neural networks. Verify credentials and perform real-time facial liveness checks to gain authorization.
+        </p>
+        <button class="btn-primary" id="btn-enter-portal">
+            <i class="fa-solid fa-camera"></i>
+            ACTIVATE BIOMETRICS
+        </button>
+        <div class="badge-container">
+            <div class="badge-item">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Anti-Spoofing</span>
+            </div>
+            <div class="badge-item">
+                <i class="fa-solid fa-microchip"></i>
+                <span>Neural Face Mesh</span>
+            </div>
+            <div class="badge-item">
+                <i class="fa-solid fa-microphone-lines"></i>
+                <span>Voice Command</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- STAGE 2: PORTAL / SCANNING SECTION -->
+    <section class="portal-container" id="portal-sec">
+        <div class="glass-wrapper">
+            
+            <!-- Left Panel: Form & Biometric Logs -->
+            <div class="portal-controls">
+                
+                <div class="portal-header">
+                    <h2>Authentication Gate</h2>
+                    <p>Enter your authorization credentials and complete the facial verification.</p>
+                </div>
+
+                <!-- Backend error alert -->
+                <div class="error-msg {% if error %}active{% endif %}" id="error-container">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span id="error-text">{{ error or "" }}</span>
+                </div>
+
+                <!-- Login Form -->
+                <form id="login-form" method="POST" action="/login">
+                    
+                    <div class="form-group">
+                        <label for="username">Operator Username</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-user-shield prefix-icon"></i>
+                            <input type="text" id="username" name="username" placeholder="Enter username" required autocomplete="off">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Security Passkey</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-key prefix-icon"></i>
+                            <input type="password" id="password" name="password" placeholder="Enter password" required autocomplete="off">
+                            <i class="fa-solid fa-eye-slash toggle-password" id="toggle-pass-visibility"></i>
+                        </div>
+                    </div>
+
+                    <!-- AI Diagnostics Panel -->
+                    <div class="diagnostics-panel">
+                        <div class="diagnostics-title">
+                            <span>Biometric Verification Checks</span>
+                            <span class="pulse-indicator"></span>
+                        </div>
+                        
+                        <div class="diag-grid">
+                            <!-- Blink Check -->
+                            <div class="diag-item">
+                                <span class="diag-label">Blink Detection</span>
+                                <div class="diag-val pending" id="chk-blink">
+                                    <span>NO</span>
+                                    <i class="fa-regular fa-circle"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Left Turn Check -->
+                            <div class="diag-item">
+                                <span class="diag-label">Head Turn Left</span>
+                                <div class="diag-val pending" id="chk-left">
+                                    <span>NO</span>
+                                    <i class="fa-regular fa-circle"></i>
+                                </div>
+                            </div>
+
+                            <!-- Right Turn Check -->
+                            <div class="diag-item">
+                                <span class="diag-label">Head Turn Right</span>
+                                <div class="diag-val pending" id="chk-right">
+                                    <span>NO</span>
+                                    <i class="fa-regular fa-circle"></i>
+                                </div>
+                            </div>
+
+                            <!-- Mouth Open Check -->
+                            <div class="diag-item">
+                                <span class="diag-label">Mouth Open</span>
+                                <div class="diag-val pending" id="chk-mouth">
+                                    <span>NO</span>
+                                    <i class="fa-regular fa-circle"></i>
+                                </div>
+                            </div>
+
+                            <!-- Emotion Check -->
+                            <div class="diag-item">
+                                <span class="diag-label">Emotion Detected</span>
+                                <div class="diag-val verified" id="chk-emotion" style="color: var(--neon-purple); text-shadow: 0 0 8px var(--neon-purple-glow);">
+                                    <span id="val-emotion">Neutral</span>
+                                    <i class="fa-solid fa-face-smile"></i>
+                                </div>
+                            </div>
+
+                            <!-- Voice Channel Status -->
+                            <div class="diag-item">
+                                <span class="diag-label">Voice Channel</span>
+                                <div class="diag-val verified" id="chk-voice-state" style="color: var(--neon-purple); text-shadow: 0 0 8px var(--neon-purple-glow);">
+                                    <span id="val-voice-state">Listening</span>
+                                    <i class="fa-solid fa-microphone-lines"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Liveness progress meter -->
+                        <div class="liveness-progress-container">
+                            <div class="liveness-progress-header">
+                                <span>LIVENESS VALIDITY SCORE</span>
+                                <span id="liveness-percentage">0%</span>
+                            </div>
+                            <div class="liveness-progress-bar">
+                                <div class="liveness-progress-fill" id="liveness-fill"></div>
+                            </div>
+                        </div>
+
+                        <!-- Voice Transcription display -->
+                        <div class="speech-command-log">
+                            <i class="fa-solid fa-microphone"></i>
+                            <span>Voice Feed: <strong id="voice-transcript">...</strong></span>
+                        </div>
+                    </div>
+
+                    <!-- Verify / Login Button -->
+                    <button type="submit" class="btn-verify-login" id="btn-login-submit" disabled>
+                        <i class="fa-solid fa-lock"></i>
+                        Biometric Locked
+                    </button>
+                    
+                </form>
+
+                <button class="btn-reset-scans" id="btn-reset-scans" type="button">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    Reset Biometric Scan
+                </button>
+
+            </div>
+
+            <!-- Right Panel: Camera Mockup Phone View -->
+            <div class="portal-scanner">
+                
+                <div class="smartphone-mockup">
+                    <!-- Laser sweep line overlay -->
+                    <div class="scanner-laser" id="scanner-laser-elem"></div>
+                    
+                    <!-- Top target box overlay -->
+                    <div class="scanner-overlay">
+                        <div class="scanner-status-banner" id="scanner-status-banner-id">
+                            <i class="fa-solid fa-crosshairs"></i>
+                            <span id="scan-banner-text">Face ID Standby</span>
+                        </div>
+                        
+                        <!-- Circular Radar Crosshair in center -->
+                        <div class="target-crosshair"></div>
+                    </div>
+                    
+                    <!-- Streamed video frame -->
+                    <img src="" class="camera-feed" id="webcam-stream" alt="Liveness Feed">
+                    
+                    <div class="smartphone-home-bar"></div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- STAGE 3: ACCESS AUTHORIZED / SUCCESS PHASE -->
+    <section class="success-phase" id="success-sec">
+        <div class="glow-orb success-orb"></div>
+        <div class="success-card">
+
+            <!-- Animated shield icon -->
+            <div class="success-shield-anim">
+                <div class="shield-ring"></div>
+                <i class="fa-solid fa-shield-check"></i>
+            </div>
+
+            <h1 class="success-title">Access Authorized</h1>
+            <p class="success-desc">
+                Your biometric profile has been successfully evaluated and matches the requested clearance.
+                Operator session is now active and secure.
+            </p>
+
+            <!-- User badge -->
+            <div class="user-badge">
+                <i class="fa-solid fa-user-gear"></i>
+                <span>Operator: <strong id="phase3-username">—</strong></span>
+            </div>
+
+            <!-- Session metadata -->
+            <div class="phase3-meta">
+                <div class="diagnostics-title" style="margin-bottom: 12px;">
+                    <span>Authorized Session Metadata</span>
+                </div>
+                <div class="meta-row">
+                    <span class="diag-label">Authentication Status</span>
+                    <span class="meta-val green">Verified (Liveness Pass)</span>
+                </div>
+                <div class="meta-row">
+                    <span class="diag-label">Authorization Clearance</span>
+                    <span class="meta-val cyan">System Administrator</span>
+                </div>
+                <div class="meta-row">
+                    <span class="diag-label">IP Address Reference</span>
+                    <span class="meta-val muted">127.0.0.1 (Localhost)</span>
+                </div>
+            </div>
+
+            <!-- Redirect progress bar -->
+            <div class="redirect-bar-container">
+                <div class="redirect-bar-fill" id="redirect-fill"></div>
+            </div>
+            <span class="redirect-label"><i class="fa-solid fa-arrow-right-to-bracket"></i> Redirecting to dashboard...</span>
+
+        </div>
+    </section>
+
+    <!-- Script file -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
