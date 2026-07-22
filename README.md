@@ -123,31 +123,8 @@ in real time.
 
 # Project Architecture
 
-```
-                Camera Input
-                     │
-                     ▼
-              Face Detection
-                     │
-                     ▼
-           Liveness Verification
-        ┌──────────┬──────────┬──────────┐
-        │          │          │
-        ▼          ▼          ▼
-    Blink      Head Turn   Mouth Open
-        │
-        ▼
-  Emotion Recognition
-        │
-        ▼
-  Voice Recognition
-        │
-        ▼
- Authentication Decision
-        │
-        ▼
- Flask Dashboard Output
-```
+```<img width="647" height="966" alt="image" src="https://github.com/user-attachments/assets/efb1c98c-e5d2-4a02-bf27-b30448dd8881" />
+
 
 ---
 
